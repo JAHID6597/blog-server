@@ -1,0 +1,70 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "DEV BLOG API",
+        "description": "DEV blog application.",
+        "version": "0.1.9"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:5000/api",
+            "description": "DEV BLOG SERVER"
+        }
+    ],
+    "paths": {
+        "/users": {
+            "get": {
+                "tags": ["user"],
+                "summary": "Returns a list of users.",
+                "description": "All users.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            },
+
+                            "application/xml": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{userName}": {
+            "get": {
+                "summary": "Return a user profile.",
+                "parameters": [
+                    {
+                        "name": "userName",
+                        "in": "path",
+                        "required": true,
+                        "description": "user name.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "description": "single user profile.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
