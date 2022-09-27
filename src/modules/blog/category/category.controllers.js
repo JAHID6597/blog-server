@@ -1,6 +1,6 @@
 const path = require("path");
-const Category = require(path.join(process.cwd(), "/models/category.model"));
-const Blog = require(path.join(process.cwd(), "/models/blog.model"));
+const Category = require(path.join(process.cwd(), "/src/modules/blog/category/category.model"));
+const Blog = require(path.join(process.cwd(), "/src/modules/blog/blog.model"));
 
 
 const populateUser = { path: 'user', select: '_id userName profilePicture' };

@@ -2,8 +2,8 @@ const path = require('path');
 const express = require('express');
 const router = express.Router();
 
-const controller = require('../controllers/tag.controllers');
-const userAuth = require(path.join(process.cwd(), '/middlewares/userAuth'));
+const controller = require('./tag.controllers');
+const userAuth = require(path.join(process.cwd(), '/src/middlewares/user-auth'));
 
 
 router.route('/api/tag/:slug')

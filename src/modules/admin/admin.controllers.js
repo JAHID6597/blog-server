@@ -1,42 +1,7 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const path = require("path");
-const Admin = require(path.join(process.cwd(), '/models/admin.model'));
-const User = require(path.join(process.cwd(), '/models/user.model'));
-const Category = require(path.join(process.cwd(), "/models/category.model"));
-const randomColor = require('randomcolor');
+const Admin = require(path.join(process.cwd(), '/src/modules/admin/admin.model'));
+const User = require(path.join(process.cwd(), '/src/modules/user/user.model'));
 
-
-async function signin(req, res) {
-    try {
-        const { email, password } = req.body;
-
-        const admin = await Admin.findOne({ email });
-        if (!admin) return res.status(400).send('Invalid credentials.');
-        
-        const isPasswordCorrect = await admin.comparePassword(password);
-        if (!isPasswordCorrect) return res.status(400).send('Invalid credentials.');
-        
-        if (admin.email === email && isPasswordCorrect) {
-            const token = jwt.sign({ id: admin._id }, process.env.ADMIN_TOKEN_SECRET, { expiresIn: '1h' });
-
-            return res.status(200).send({ accessToken: token });
-        }
-        else res.status(400).send('Invalid Credentials');
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal server error!');
-    }
-}
-
-async function logout(req, res) {
-    try {
-        res.status(200).send('Successfully logged out');
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal server error!');
-    }
-}
 
 
 async function createAdmin(req, res) {
@@ -151,94 +116,6 @@ async function deleteProfile(req, res) {
 }
 
 
-async function getCategory(req, res) {
-    try {
-        const { slug } = req.params;
-        
-        const category = await Category.findOne({ slug });
-
-        res.status(200).send(category);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal server error!');
-    }
-}
-
-async function getCategories(req, res) {
-    try {
-        const limit = +req.query.limit || 10;
-        const page = +req.query.page || 1;
-
-        const categories = await Category
-                                    .find()
-                                    .skip(limit * (page - 1))
-                                    .limit(limit)
-                                    .sort({ createdAt: 'DESC' });
-        const totalCategories = await Category.count();
-
-        const data = {
-            categories,
-            metaData: {
-                start: (limit * (page - 1)) + 1,
-                end: limit * page,
-                total: totalCategories,
-                page,
-                limit
-            }
-        };
-
-        res.status(200).send(data);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal server error!');
-    }
-}
-
-async function createNewCategory(req, res) {
-    try {
-        const { name, description, image } = req.body;
-
-        const category = new Category(
-            { name, description, image, color: randomColor({ luminosity: 'dark', format: 'rgb' }), createdBy: req.id }
-        );
-        const newCategory = await category.save();
-
-        res.status(200).send(newCategory);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal server error!');
-    }
-}
-
-async function updateCategory(req, res) {
-    try {
-        const { slug } = req.params;
-
-        const { name, description, image } = req.body;
-
-        const category = await Category.findOneAndUpdate({ slug }, { name, description, image }, { new: true });
-
-        res.status(200).send(category);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal server error!');
-    }
-}
-
-async function deleteCategory(req, res) {
-    try {
-        const { slug } = req.params;
-        
-        const category = await Category.findOneAndDelete({ slug });
-
-        res.status(200).send(category);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal server error!');
-    }
-}
-
-
 async function getUsers(req, res) {
     try {
         const limit = req.query.limit || 10;
@@ -279,8 +156,6 @@ async function getUsers(req, res) {
 }
 
 
-module.exports.signin = signin;
-module.exports.logout = logout;
 
 module.exports.createAdmin = createAdmin;
 module.exports.getAdmins = getAdmins;
@@ -288,11 +163,5 @@ module.exports.getAdmin = getAdmin;
 module.exports.getPrivateProfile = getPrivateProfile;
 module.exports.updateProfile = updateProfile;
 module.exports.deleteProfile = deleteProfile;
-
-module.exports.getCategory = getCategory;
-module.exports.getCategories = getCategories;
-module.exports.createNewCategory = createNewCategory;
-module.exports.updateCategory = updateCategory;
-module.exports.deleteCategory = deleteCategory;
 
 module.exports.getUsers = getUsers;

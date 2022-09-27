@@ -1,12 +1,10 @@
 const path = require("path");
-const Category = require(path.join(process.cwd(), "/models/category.model"));
-const Tag = require(path.join(process.cwd(), "/models/tag.model"));
-const Blog = require(path.join(process.cwd(), "/models/blog.model"));
-const Like = require(path.join(process.cwd(), "/models/like.model"));
-const Bookmark = require(path.join(process.cwd(), "/models/bookmark.model"));
-const cloudinary = require(path.join(process.cwd(), "/lib/cloudinary"));
+const Category = require(path.join(process.cwd(), "/src/modules/blog/category/category.model"));
+const Tag = require(path.join(process.cwd(), "/src/modules/blog/tag/tag.model"));
+const Blog = require(path.join(process.cwd(), "/src/modules/blog/blog.model"));
+const cloudinary = require(path.join(process.cwd(), "/src/libs/cloudinary"));
 const randomColor = require('randomcolor');
-const { makeCustomSlug } = require(path.join(process.cwd(), "/utils/slug"));
+const { makeCustomSlug } = require(path.join(process.cwd(), "/src/utils/slug"));
 
 
 const populateUser = { path: 'user', select: '_id userName profilePicture' };
@@ -229,84 +227,9 @@ async function deleteBlog(req, res) {
 }
 
 
-async function likeBlog(req, res) {
-    try {
-        const { slug } = req.params;
-
-        const blog = await Blog.findOne({ slug });
-        if(!blog) return res.status(404).send('Not found any blog.');
-
-        const liked = await Like.findOne({ user: req.id, blog: blog._id });
-        if (liked) {
-            const deleteLiked = await liked.delete();
-
-            const updatedBlog = await Blog
-                                    .findOneAndUpdate({ slug }, { $pull: { likes: deleteLiked._id } }, { new: true })
-                                    .populate(populateUser)
-                                    .populate(populateComment)
-                                    .populate(populateLike)
-                                    .populate(populateBookmark);
-            return res.status(200).send(updatedBlog);
-        }
-
-        const newLike = new Like({ user: req.id, blog: blog._id });
-        const newLiked = await newLike.save();
-
-        const updatedBlog = await Blog
-                                .findOneAndUpdate({ slug }, { $push: { likes: newLiked._id } }, { new: true })
-                                .populate(populateUser)
-                                .populate(populateComment)
-                                .populate(populateLike)
-                                .populate(populateBookmark);
-        return res.status(200).send(updatedBlog);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal server error!');
-    }
-}
-
-async function bookmarkBlog(req, res) {
-    try {
-        const { slug } = req.params;
-
-        const blog = await Blog.findOne({ slug });
-        if(!blog) return res.status(404).send('Not found any blog.');
-
-        const bookmarked = await Bookmark.findOne({ user: req.id, blog: blog._id });
-        if (bookmarked) {
-            const deleteBookmarked = await bookmarked.delete();
-
-            const updatedBlog = await Blog
-                                    .findOneAndUpdate({ slug }, { $pull: { bookmarks: deleteBookmarked._id } }, { new: true })
-                                    .populate(populateUser)
-                                    .populate(populateComment)
-                                    .populate(populateLike)
-                                    .populate(populateBookmark);
-            return res.status(200).send(updatedBlog);
-        }
-
-        const newBookmark = new Bookmark({ user: req.id, blog: blog._id });
-        const newBookmarked = await newBookmark.save();
-
-        const updatedBlog = await Blog
-                                .findOneAndUpdate({ slug }, { $push: { bookmarks: newBookmarked._id } }, { new: true })
-                                .populate(populateUser)
-                                .populate(populateComment)
-                                .populate(populateLike)
-                                .populate(populateBookmark);
-        return res.status(200).send(updatedBlog);
-    } catch (error) {
-        console.log(error);
-        res.status(500).send('Internal server error!');
-    }
-}
-
-
 module.exports.getBlog = getBlog;
 module.exports.getBlogs = getBlogs;
 module.exports.getReadNextBlogs = getReadNextBlogs;
 module.exports.createNewBlog = createNewBlog;
 module.exports.updateBlog = updateBlog;
 module.exports.deleteBlog = deleteBlog;
-module.exports.likeBlog = likeBlog;
-module.exports.bookmarkBlog = bookmarkBlog;

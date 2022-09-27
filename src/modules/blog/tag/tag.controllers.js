@@ -1,6 +1,6 @@
 const path = require("path");
-const Tag = require(path.join(process.cwd(), "/models/tag.model"));
-const Blog = require(path.join(process.cwd(), "/models/blog.model"));
+const Tag = require(path.join(process.cwd(), "/src/modules/blog/tag/tag.model"));
+const Blog = require(path.join(process.cwd(), "/src/modules/blog/blog.model"));
 
 
 async function getTag(req, res) {

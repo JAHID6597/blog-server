@@ -1,16 +1,15 @@
+const path = require("path");
 const express = require('express');
 const cors = require('cors');
 const dotEnv = require('dotenv');
 
-const connection = require('./database/mongodb-connection');
+const connection = require(path.join(process.cwd(), '/src/database/mongodb-connection'));
 
-const userRoutes = require('./routes/user.routes');
-const blogRoutes = require('./routes/blog.routes');
-const categoryRoutes = require('./routes/category.routes');
-const tagRoutes = require('./routes/tag.routes');
-const adminRoutes = require('./routes/admin.routes');
+const userRoutes = require(path.join(process.cwd(), '/src/modules/user/user.routes'));
+const blogRoutes = require(path.join(process.cwd(), '/src/modules/blog/blog.routes'));
+const adminRoutes = require(path.join(process.cwd(), '/src/modules/admin/admin.routes'));
 
-const swaggerDocs = require('./lib/swagger');
+const swaggerDocs = require(path.join(process.cwd(), '/src/libs/swagger'));
 
 const app = express();
 
@@ -23,8 +22,6 @@ connection();
 
 app.use(userRoutes);
 app.use(blogRoutes);
-app.use(categoryRoutes);
-app.use(tagRoutes);
 app.use(adminRoutes);
 
 const PORT = process.env.PORT || 5000;

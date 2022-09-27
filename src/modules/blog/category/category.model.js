@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
 const path = require("path");
-const { makeCustomSlug } = require(path.join(process.cwd(), "/utils/slug"));
+const { makeCustomSlug } = require(path.join(process.cwd(), "/src/utils/slug"));
 
-const tagSchema = mongoose.Schema(
+
+const categorySchema = mongoose.Schema(
     {
         name: {
             type: String,
@@ -14,6 +15,13 @@ const tagSchema = mongoose.Schema(
             required: true,
             unique: true
         },
+        description: {
+            type: String,
+            required: true,
+        },
+        image: {
+            type: String
+        },
         color: {
             type: String,
             required: true,
@@ -21,8 +29,12 @@ const tagSchema = mongoose.Schema(
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
+            ref: "admins",
             required: true,
+        },
+        updatedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "admins"
         },
         blogs: [{
             type: mongoose.Schema.Types.ObjectId,
@@ -39,12 +51,13 @@ const tagSchema = mongoose.Schema(
     }
 );
 
-tagSchema.pre('validate', async function (next) {
+categorySchema.pre('validate', async function (next) {
     if (this.isModified('name'))
         this.slug = await makeCustomSlug(this.name);
     
     next();
-})
+});
 
-const Tag = mongoose.model("tags", tagSchema);
-module.exports = Tag;
+
+const Category = mongoose.model("categories", categorySchema);
+module.exports = Category;

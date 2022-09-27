@@ -1,6 +1,6 @@
 const path = require("path");
-const Comment = require(path.join(process.cwd(), "/models/comment.model"));
-const Blog = require(path.join(process.cwd(), "/models/blog.model"));
+const Comment = require(path.join(process.cwd(), "/src/modules/blog/comment/comment.model"));
+const Blog = require(path.join(process.cwd(), "/src/modules/blog/blog.model"));
 
 
 async function getComment(req, res) {
