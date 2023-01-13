@@ -1,6 +1,7 @@
 const path = require("path");
-const Comment = require(path.join(process.cwd(), "/src/modules/blog/comment/comment.model"));
+const User = require(path.join(process.cwd(), "/src/modules/user/user.model"));
 const Blog = require(path.join(process.cwd(), "/src/modules/blog/blog.model"));
+const Comment = require(path.join(process.cwd(), "/src/modules/blog/comment/comment.model"));
 
 
 async function getComment(req, res) {
@@ -98,9 +99,10 @@ async function updateComment(req, res) {
         const blog = await Blog.findOne({ slug });
         if (!blog) return res.status(404).send('Not found any blog.');
 
-        const { comment } = req.body;
+        const { comment, isActive } = req.body;
+        const updateBody = { comment, isActive };
 
-        const updatedComment = await Comment.findOneAndUpdate({ id }, { comment }, { new: true });
+        const updatedComment = await Comment.findByIdAndUpdate(id, updateBody, { new: true });
 
         res.status(200).send(updatedComment);
     } catch (error) {

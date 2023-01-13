@@ -1,7 +1,9 @@
 const path = require("path");
 const Category = require(path.join(process.cwd(), "/src/modules/blog/category/category.model"));
 const Tag = require(path.join(process.cwd(), "/src/modules/blog/tag/tag.model"));
+const User = require(path.join(process.cwd(), '/src/modules/user/user.model'));
 const Blog = require(path.join(process.cwd(), "/src/modules/blog/blog.model"));
+const Comment = require(path.join(process.cwd(), "/src/modules/blog/comment/comment.model"));
 const cloudinary = require(path.join(process.cwd(), "/src/libs/cloudinary"));
 const randomColor = require('randomcolor');
 const { makeCustomSlug } = require(path.join(process.cwd(), "/src/utils/slug"));
@@ -39,9 +41,12 @@ async function getBlogs(req, res) {
         const search = new RegExp(req.query.search, 'i');
 
         let query = {};
-        if (search) query = { ...query, $or: [{ title: search }, { searchContent: search }] };
-        if (req.query.category) query = { ...query, categories: { $in: req.query.category.toLowerCase() } };
-        if (req.query.tag) query = { ...query, tags: { $in: req.query.tag.toLowerCase() } };
+        if (search)
+            query = { ...query, $or: [{ title: search }, { searchContent: search }] };
+        if (req.query.category)
+            query = { ...query, categories: { $in: req.query.category.toLowerCase() } };
+        if (req.query.tag)
+            query = { ...query, tags: { $in: req.query.tag.toLowerCase() } };
 
         const blogs = await Blog
                             .find(query)
@@ -147,23 +152,57 @@ async function createNewBlog(req, res) {
         for (let i = 0; i < newTags.length; i++) {
             const tagExits = await Tag.findOne({ name: newTags[i] });
 
+            let tagData = {};
+
             if (!tagExits) {
-                const tag = new Tag(
-                    {
-                        name: newTags[i],
-                        createdBy: req.id,
-                        blogs: [newBlog._id],
-                        color: randomColor({ luminosity: 'dark', format: 'rgb' })
-                    }
-                );
-                await tag.save();
+                const tagBody = {
+                    name: newTags[i],
+                    createdBy: req.id,
+                    blogs: [newBlog._id],
+                    color: randomColor({ luminosity: 'dark', format: 'rgb' })
+                }
+                const tag = new Tag(tagBody);
+                tagData = await tag.save();
             } else {
-                await Tag.findOneAndUpdate({ name: newTags[i] }, { $push: { blogs: newBlog._id } }, { new: true });
+                tagData = await Tag.findOneAndUpdate(
+                    { name: newTags[i] },
+                    { $push: { blogs: newBlog._id } },
+                    { new: true }
+                );
+            }
+            const updateTag = await User.findOneAndUpdate(
+                { _id: newBlog.user, 'usedTags.tagId': tagData._id },
+                { $inc: { 'usedTags.$.count': 1 } },
+                { new: true }
+            );
+            if (!updateTag) {
+                await User.findByIdAndUpdate(
+                    newBlog.user,
+                    { $push: { usedTags: { tagId: tagData._id, name: tagData.name } } },
+                    { new: true }
+                );
             }
         }
 
         for (let i = 0; i < categories.length; i++) { 
-            await Category.findOneAndUpdate({ name: categories[i] }, { $push: { blogs: newBlog._id } }, { new: true });
+            const categoryData = await Category.findOneAndUpdate(
+                { name: categories[i] },
+                { $push: { blogs: newBlog._id } },
+                { new: true }
+            );
+
+            const updateCategory = await User.findOneAndUpdate(
+                { _id: newBlog.user, 'usedCategories.categoryId': categoryData._id },
+                { $inc: { 'usedCategories.$.count': 1 } },
+                { new: true }
+            );
+            if (!updateCategory) {
+                await User.findByIdAndUpdate(
+                    newBlog.user,
+                    { $push: { usedCategories: { categoryId: categoryData._id, name: categoryData.name } } },
+                    { new: true }
+                );
+            }
         }
 
         res.status(200).send(newBlog);
@@ -182,6 +221,26 @@ async function updateBlog(req, res) {
         const oldBlog = await Blog.findOne({ slug });
         if (!oldBlog) return res.status(404).send('Blog not found.');
 
+        const removedTags = [];
+        oldBlog.tags.forEach(tag => {
+            if (!tags.includes(tag)) removedTags.push(tag);
+        });
+
+        const newTags = [];
+        tags.forEach(tag => {
+            if (!oldBlog.tags.includes(tag)) newTags.push(tag);
+        });
+
+        const removedCategories = [];
+        oldBlog.categories.forEach(category => {
+            if (!categories.includes(category)) removedCategories.push(category);
+        });
+
+        const newCategories = [];
+        categories.forEach(category => {
+            if (!oldBlog.categories.includes(category)) newCategories.push(category);
+        });
+
         const updatedBlogData = {
             title,
             slug: !title || oldBlog.title === title ? oldBlog.slug : await makeCustomSlug(title),
@@ -189,8 +248,12 @@ async function updateBlog(req, res) {
             categories,
             content,
             searchContent,
-            cardImage: !cardImage || cardImage.indexOf('http') === 0 ? oldBlog.cardImage : (await cloudinary.uploader.upload(cardImage)).secure_url,
-            bannerImage: !bannerImage || bannerImage.indexOf('http') === 0 ? oldBlog.bannerImage : (await cloudinary.uploader.upload(bannerImage)).secure_url,
+            cardImage: !cardImage || cardImage.indexOf('http') === 0
+                ? oldBlog.cardImage
+                : (await cloudinary.uploader.upload(cardImage)).secure_url,
+            bannerImage: !bannerImage || bannerImage.indexOf('http') === 0
+                ? oldBlog.bannerImage
+                : (await cloudinary.uploader.upload(bannerImage)).secure_url,
             isActive,
         };
 
@@ -200,6 +263,52 @@ async function updateBlog(req, res) {
                             .populate(populateComment)
                             .populate(populateLike)
                             .populate(populateBookmark);
+        
+        for (let i = 0; i < removedTags.length; i++) { 
+            await User.findOneAndUpdate(
+                { _id: blog.user, 'usedTags.name': removedTags[i] },
+                { $inc: { 'usedTags.$.count': -1 } },
+                { new: true })
+        }
+
+        for (let i = 0; i < newTags.length; i++) { 
+            const tagBody = {
+                name: newTags[i],
+                createdBy: req.id,
+                blogs: [blog._id],
+                color: randomColor({ luminosity: 'dark', format: 'rgb' })
+            }
+            const tag = new Tag(tagBody);
+            tagData = await tag.save();
+            
+            await User.findByIdAndUpdate(
+                blog.user,
+                { $push: { usedTags: { tagId: tagData._id, name: tagData.name } } },
+                { new: true }
+            );
+        }
+
+        for (let i = 0; i < removedCategories.length; i++) {
+            await User.findOneAndUpdate(
+                { _id: blog.user, 'usedCategories.name': removedCategories[i] },
+                { $inc: { 'usedCategories.$.count': -1 } },
+                { new: true }
+            );
+        }
+
+        for (let i = 0; i < newCategories.length; i++) {
+            const categoryData = await Category.findOne(
+                { name: newCategories[i] },
+                { $push: { blogs: blog._id } },
+                { new: true }
+            );
+
+            await User.findByIdAndUpdate(
+                blog.user,
+                { $push: { usedCategories: { categoryId: categoryData._id, name: categoryData.name } } },
+                { new: true }
+            );
+        }
 
         res.status(200).send(blog);
     } catch (error) {
@@ -218,6 +327,25 @@ async function deleteBlog(req, res) {
         const blog = await Blog.findOneAndDelete({ slug });
 
         await User.findByIdAndUpdate(blog.user, { $pull: { blogs: blog._id } }, { new: true });
+
+        for (let i = 0; i < blog.tags.length; i++) { 
+            await User.findOneAndUpdate(
+                { _id: blog.user, 'usedTags.name': blog.tags[i] },
+                { $inc: { 'usedTags.$.count': -1 } },
+                { new: true })
+        }
+
+        for (let i = 0; i < blog.categories.length; i++) { 
+            await User.findOneAndUpdate(
+                { _id: blog.user, 'usedCategories.name': blog.categories[i] },
+                { $inc: { 'usedCategories.$.count': -1 } },
+                { new: true })
+        }
+
+        for (let i = 0; i < blog.comments.length; i++) { 
+            await User.findByIdAndUpdate(blog.user, { $pull: { comments: blog.comments[i] } }, { new: true });
+            await Comment.findByIdAndDelete(blog.comments[i]);
+        }
 
         res.status(200).send(blog);
     } catch (error) {

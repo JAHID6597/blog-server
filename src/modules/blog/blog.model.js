@@ -23,12 +23,10 @@ const blogSchema = mongoose.Schema(
         bannerImage: { type: String, required: true },
         tags: [{
             type: String,
-            ref: "tags",
             required: true
         }],
         categories: [{
             type: String,
-            ref: "categories",
             required: true
         }],
         likes: [{

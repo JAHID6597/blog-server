@@ -10,11 +10,15 @@ const multer = require(path.join(process.cwd(), '/src/libs/multer'));
 const commentRoutes = require(path.join(process.cwd(), '/src/modules/blog/comment/comment.routes'));
 const categoryRoutes = require(path.join(process.cwd(), '/src/modules/blog/category/category.routes'));
 const tagRoutes = require(path.join(process.cwd(), '/src/modules/blog/tag/tag.routes'));
+const likeRoutes = require(path.join(process.cwd(), '/src/modules/blog/like/like.routes'));
+const bookmarkRoutes = require(path.join(process.cwd(), '/src/modules/blog/bookmark/bookmark.routes'));
 
 
 router.use(commentRoutes);
 router.use(categoryRoutes);
 router.use(tagRoutes);
+router.use(likeRoutes);
+router.use(bookmarkRoutes);
 
 
 

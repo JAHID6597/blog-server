@@ -1,4 +1,5 @@
 const path = require("path");
+const User = require(path.join(process.cwd(), '/src/modules/user/user.model'));
 const Blog = require(path.join(process.cwd(), "/src/modules/blog/blog.model"));
 const Like = require(path.join(process.cwd(), "/src/modules/blog/like/like.model"));
 
@@ -25,6 +26,9 @@ async function likeBlog(req, res) {
                                     .populate(populateComment)
                                     .populate(populateLike)
                                     .populate(populateBookmark);
+            
+            await User.findByIdAndUpdate(blog.user, { $pull: { likedBlogs: deleteLiked._id } }, { new: true });
+            
             return res.status(200).send(updatedBlog);
         }
 
@@ -37,6 +41,9 @@ async function likeBlog(req, res) {
                                 .populate(populateComment)
                                 .populate(populateLike)
                                 .populate(populateBookmark);
+        
+        await User.findByIdAndUpdate(blog.user, { $push: { likedBlogs: newLiked._id } }, { new: true });
+        
         return res.status(200).send(updatedBlog);
     } catch (error) {
         console.log(error);

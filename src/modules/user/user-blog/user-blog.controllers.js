@@ -665,7 +665,7 @@ async function getCommentsByPrivateUser(req, res) {
                 }
             }
         ];
-console.log(req.id)
+
         const comments = await Comment
                             .aggregate([
                                 ...query,
@@ -675,14 +675,22 @@ console.log(req.id)
                             .skip(limit * (page - 1))
                             .limit(limit);
         
-        const totalComments = await Comment.count(query);
+        const totalComments = await Comment.count([
+                                                    ...query,
+                                                    {
+                                                        $group: {
+                                                            _id: null,
+                                                            count: { $sum: 1 }
+                                                        }
+                                                    }
+                                                ]);
 
         const data = {
             comments,
             metaData: {
                 start: (limit * (page - 1)) + 1,
                 end: limit * page,
-                total: totalComments,
+                total: totalComments[0]?.count || 0,
                 page,
                 limit
             }

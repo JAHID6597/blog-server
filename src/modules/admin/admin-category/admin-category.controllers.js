@@ -1,7 +1,7 @@
 const path = require("path");
 const Category = require(path.join(process.cwd(), "/src/modules/blog/category/category.model"));
 const randomColor = require('randomcolor');
-
+const Blog = require(path.join(process.cwd(), "/src/modules/blog/blog.model"));
 
 
 async function getCategory(req, res) {
@@ -81,10 +81,15 @@ async function updateCategory(req, res) {
 async function deleteCategory(req, res) {
     try {
         const { slug } = req.params;
-        
-        const category = await Category.findOneAndDelete({ slug });
+        const category = await Category.findOne({ slug });
+        if(!category) return res.status(404).send('Not found any category.');
 
-        res.status(200).send(category);
+        const blog = await Blog.find({ categories: { $in: category.name } });
+        if(blog.length) return res.status(400).send('Category already used.');
+        console.log(blog)
+        const deletedCategory = await Category.findOneAndDelete({ slug });
+
+        res.status(200).send(deletedCategory);
     } catch (error) {
         console.log(error);
         res.status(500).send('Internal server error!');

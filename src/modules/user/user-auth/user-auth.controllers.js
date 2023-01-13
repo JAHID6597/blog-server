@@ -16,7 +16,7 @@ async function signin(req, res) {
         if (!isPasswordCorrect) return res.status(400).send('Invalid credentials.');
         
         if (user.email === email && isPasswordCorrect) {
-            const token = jwt.sign({ id: user._id }, process.env.USER_TOKEN_SECRET, { expiresIn: '1h' });
+            const token = jwt.sign({ id: user._id }, process.env.USER_TOKEN_SECRET, { expiresIn: '24h' });
 
             return res.status(200).send({ accessToken: token });
         }

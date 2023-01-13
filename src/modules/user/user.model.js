@@ -46,12 +46,20 @@ const userSchema = mongoose.Schema(
             default: true
         },
         usedTags: [{
+            tagId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "tags",
+            },
             name: String,
-            count: { type: Number, default: 0 }
+            count: { type: Number, default: 1 }
         }],
         usedCategories: [{
+            categoryId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "categories",
+            },
             name: String,
-            count: { type: Number, default: 0 }
+            count: { type: Number, default: 1 }
         }],
         followers: [{
             type: mongoose.Schema.Types.ObjectId,
@@ -68,6 +76,14 @@ const userSchema = mongoose.Schema(
         comments: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "comments",
+        }],
+        likedBlogs: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "likes",
+        }],
+        bookmarkedBlogs: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "bookmarks",
         }],
 	},
 	{
