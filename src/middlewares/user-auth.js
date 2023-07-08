@@ -8,11 +8,10 @@ const userAuth = (req, res, next) => {
         req.id = decode?.id;
 
         next();
-
     } catch (error) {
         console.log(error);
-        res.status(500).send('Internal server error!');
+        res.status(500).send("Internal server error!");
     }
-}
+};
 
 module.exports = userAuth;

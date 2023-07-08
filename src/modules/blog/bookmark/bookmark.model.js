@@ -11,11 +11,11 @@ const bookmarkSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "blogs",
             required: true,
-        }
+        },
     },
     {
         timestamps: true,
-    }
+    },
 );
 
 const Bookmark = mongoose.model("bookmarks", bookmarkSchema);

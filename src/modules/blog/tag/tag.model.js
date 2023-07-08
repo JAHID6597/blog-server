@@ -7,44 +7,45 @@ const tagSchema = mongoose.Schema(
         name: {
             type: String,
             required: true,
-            unique: true
+            unique: true,
         },
         slug: {
             type: String,
             required: true,
-            unique: true
+            unique: true,
         },
         color: {
             type: String,
             required: true,
-            default: "#000000"
+            default: "#000000",
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "users",
             required: true,
         },
-        blogs: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "blogs"
-        }],
+        blogs: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "blogs",
+            },
+        ],
         isActive: {
             type: Boolean,
             required: true,
-            default: true
-        }
+            default: true,
+        },
     },
     {
         timestamps: true,
-    }
+    },
 );
 
-tagSchema.pre('validate', async function (next) {
-    if (this.isModified('name'))
-        this.slug = await makeCustomSlug(this.name);
-    
+tagSchema.pre("validate", async function (next) {
+    if (this.isModified("name")) this.slug = await makeCustomSlug(this.name);
+
     next();
-})
+});
 
 const Tag = mongoose.model("tags", tagSchema);
 module.exports = Tag;

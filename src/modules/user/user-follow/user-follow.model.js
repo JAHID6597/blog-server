@@ -11,11 +11,11 @@ const followSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "users",
             required: true,
-        }
+        },
     },
     {
         timestamps: true,
-    }
+    },
 );
 
 const Follow = mongoose.model("follows", followSchema);

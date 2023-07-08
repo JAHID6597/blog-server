@@ -1,30 +1,34 @@
 {
-  "name": "blog-server",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index",
-    "devStart": "nodemon index"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cloudinary": "^1.30.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.0",
-    "express": "^4.17.3",
-    "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.2.2",
-    "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.7.2",
-    "nodemon": "^2.0.15",
-    "otp-generator": "^4.0.0",
-    "randomcolor": "^0.6.2",
-    "swagger-jsdoc": "^6.2.1",
-    "swagger-ui-express": "^4.4.0",
-    "unique-slug": "^2.0.2"
-  }
+    "name": "blog-server",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index",
+        "devStart": "nodemon index",
+        "format:prettier": "prettier --write \"./**/*.{js,jsx,ts,tsx,json}\""
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "bcryptjs": "^2.4.3",
+        "cloudinary": "^1.30.0",
+        "cors": "^2.8.5",
+        "dotenv": "^16.0.0",
+        "express": "^4.17.3",
+        "jsonwebtoken": "^8.5.1",
+        "mongoose": "^6.2.2",
+        "multer": "^1.4.5-lts.1",
+        "nodemailer": "^6.7.2",
+        "nodemon": "^2.0.15",
+        "otp-generator": "^4.0.0",
+        "randomcolor": "^0.6.2",
+        "swagger-jsdoc": "^6.2.1",
+        "swagger-ui-express": "^4.4.0",
+        "unique-slug": "^2.0.2"
+    },
+    "devDependencies": {
+        "prettier": "^3.0.0"
+    }
 }

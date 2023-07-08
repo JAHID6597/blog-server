@@ -11,11 +11,11 @@ const likeSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "blogs",
             required: true,
-        }
+        },
     },
     {
         timestamps: true,
-    }
+    },
 );
 
 const Like = mongoose.model("likes", likeSchema);

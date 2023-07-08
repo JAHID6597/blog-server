@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-
 const commentSchema = mongoose.Schema(
     {
         user: {
@@ -20,14 +19,13 @@ const commentSchema = mongoose.Schema(
         isActive: {
             type: Boolean,
             required: true,
-            default: true
-        }
+            default: true,
+        },
     },
     {
         timestamps: true,
-    }
+    },
 );
-
 
 const Comment = mongoose.model("comments", commentSchema);
 module.exports = Comment;
