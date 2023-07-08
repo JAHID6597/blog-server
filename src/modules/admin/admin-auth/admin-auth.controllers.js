@@ -5,12 +5,12 @@ const Admin = require(path.join(
     "/src/modules/admin/admin.model",
 ));
 
-async function signin(req, res) {
+async function signIn(req, res) {
     try {
         const { email, password } = req.body;
 
         const admin = await Admin.findOne({ email });
-        if (!admin) return res.status(400).send("Invalid credentials.");
+        if (!admin) return res.status(404).send("Invalid credentials.");
 
         const isPasswordCorrect = await admin.comparePassword(password);
         if (!isPasswordCorrect)
@@ -31,14 +31,4 @@ async function signin(req, res) {
     }
 }
 
-async function logout(req, res) {
-    try {
-        res.status(200).send("Successfully logged out");
-    } catch (error) {
-        console.log(error);
-        res.status(500).send("Internal server error!");
-    }
-}
-
-module.exports.signin = signin;
-module.exports.logout = logout;
+module.exports.signIn = signIn;

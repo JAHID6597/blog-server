@@ -8,8 +8,6 @@ const adminAuth = require(path.join(
 ));
 const controller = require("./admin-auth.controllers");
 
-router.post("/api/admin/signin", controller.signin);
-
-router.get("/api/admin/logout", adminAuth, controller.logout);
+router.post("/api/admin/signin", controller.signIn);
 
 module.exports = router;
